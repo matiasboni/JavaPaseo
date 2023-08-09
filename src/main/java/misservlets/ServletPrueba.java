@@ -84,9 +84,9 @@ public class ServletPrueba extends HttpServlet {
     
     public void pruebasUsuario() {
     	u=new Usuario("admin@gmail.com",MD5.encodeMD5("12345678"),Rol.admin, "Juan", "Ro", "4123123");
-		u1=new Usuario("visitante1@gmail.com",MD5.encodeMD5("12345678"),Rol.visitante, "Pedro", "Po", "41231232");
-		u2=new Usuario("visitante2@gmail.com",MD5.encodeMD5("12345678"),Rol.visitante, "Pepito", "dsa", "41231234");
-		u3=new Usuario("visitante3@gmail.com",MD5.encodeMD5("12345678"),Rol.visitante, "Juanfer", "crack", "91218000");
+		u1=new Usuario("visitante1@gmail.com",MD5.encodeMD5("12345678"),Rol.visitante, "Pedro", "Rodriguez", "41231232");
+		u2=new Usuario("visitante2@gmail.com",MD5.encodeMD5("12345678"),Rol.visitante, "Pepito", "Perez", "41231234");
+		u3=new Usuario("visitante3@gmail.com",MD5.encodeMD5("12345678"),Rol.visitante, "Juan", "cra", "91218000");
 		u4=new Usuario("visitante4@gmail.com",MD5.encodeMD5("12345678"),Rol.visitante, "Enzo", "Pe", "91218001");
 		//Se crea un usuario admin
 		usuarioDAO.guardar(u);
@@ -327,7 +327,7 @@ public class ServletPrueba extends HttpServlet {
     	}
     	System.out.println("Pedido despues de cancelar:");
     	System.out.println(pedido1);
-    	Pedido pedido5=new Pedido(Estado.Preparacion,u4);
+    	Pedido pedido5=new Pedido(Estado.Preparacion,u1);
     	//Guardar pedido
     	pedidoDAO.guardar(pedido5);
     	Pedido pedido6=new Pedido(Estado.Preparacion,u2);
@@ -353,11 +353,11 @@ public class ServletPrueba extends HttpServlet {
     private void crearRonda_PuntoRetiro_Direccion() {
     	Calendar calendar = Calendar.getInstance();
     	calendar.set(Calendar.YEAR, 2023);
-    	calendar.set(Calendar.MONTH, Calendar.JULY);
-    	calendar.set(Calendar.DAY_OF_MONTH, 10);
+    	calendar.set(Calendar.MONTH, Calendar.AUGUST);
+    	calendar.set(Calendar.DAY_OF_MONTH, 7);
     	java.util.Date fechaInicio=calendar.getTime();
-    	calendar.set(Calendar.DAY_OF_MONTH, 14);
-    	LocalDate fechaRetiro = LocalDate.of(2023, 7, 15);
+    	calendar.set(Calendar.DAY_OF_MONTH, 11);
+    	LocalDate fechaRetiro = LocalDate.of(2023, 8, 12);
     	LocalTime retiroInicio = LocalTime.of(8, 0);
     	LocalTime retiroFin = LocalTime.of(17, 0);
     	ronda = new Ronda(fechaInicio, calendar.getTime(), fechaRetiro, retiroInicio, retiroFin);
@@ -372,6 +372,59 @@ public class ServletPrueba extends HttpServlet {
     	//Se guardan la ronda y el punto de retiro
     	rondaDAO.guardar(ronda);
     	direccionDAO.guardar(direccion);
+    }
+    
+    
+    private void crearPedidosRepartoRetiro() {
+    	pedido=new Pedido(Estado.Preparacion,u2);
+    	//Guardar pedido
+    	pedidoDAO.guardar(pedido);
+    	//Agregar Producto al pedido
+    	ProductoPedido pp = new ProductoPedido(produc);
+    	pp.setCantidad(2);
+    	if (produc.hayStockDisponible(2)) {
+    		pp.setPedido(pedido);
+    		pedido.agregarProductoPedido(pp);
+    	}
+    	ProductoPedido pp1 = new ProductoPedido(produc2);
+    	pp1.setCantidad(1);
+    	if (produc1.hayStockDisponible(1)) {
+    		pp1.setPedido(pedido);
+    		pedido.agregarProductoPedido(pp1);	
+    	}
+    	pedido.confirmar(ronda, direccion,"De 10 a 12"); //Esta en pendiente
+    	pedidoDAO.modificar(pedido);
+    	
+    	
+    	
+    	
+    	pedido=new Pedido(Estado.Preparacion,u2);
+    	//Guardar pedido
+    	pedidoDAO.guardar(pedido);
+    	//Agregar Producto al pedido
+        pp1 = new ProductoPedido(produc2);
+    	pp1.setCantidad(1);
+    	if (produc1.hayStockDisponible(1)) {
+    		pp1.setPedido(pedido);
+    		pedido.agregarProductoPedido(pp1);	
+    	}
+    	pedido.confirmar(ronda, direccion,"De 10 a 12"); //Esta en pendiente
+    	pedidoDAO.modificar(pedido);
+    	
+    	
+    	
+    	pedido=new Pedido(Estado.Preparacion,u1);
+    	//Guardar pedido
+    	pedidoDAO.guardar(pedido);
+    	//Agregar Producto al pedido
+        pp1 = new ProductoPedido(produc);
+    	pp1.setCantidad(1);
+    	if (produc1.hayStockDisponible(1)) {
+    		pp1.setPedido(pedido);
+    		pedido.agregarProductoPedido(pp1);	
+    	}
+    	pedido.confirmar(ronda, punto);
+    	pedidoDAO.modificar(pedido);
     }
 
 	
@@ -389,6 +442,7 @@ public class ServletPrueba extends HttpServlet {
 		this.pruebasPedidoRetiro();
 		System.out.println("-".repeat(50));
 		this.pruebasPedido();
+		this.crearPedidosRepartoRetiro();
 	}
 
 }

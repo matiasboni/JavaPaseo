@@ -49,6 +49,8 @@ public class Pedido {
 	}
 	
 	
+	
+	
 	public void agregarProductoPedido(ProductoPedido p) {
 		     productosPedidos.add(p);
 		     this.total=this.total.add(p.getProducto().getPrecio().multiply(BigDecimal.valueOf(p.getCantidad())));    
