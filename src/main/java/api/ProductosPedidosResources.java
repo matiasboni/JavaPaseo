@@ -4,8 +4,6 @@ import dto.ProductoPedidoDTO;
 import entidades.Pedido;
 import entidades.Producto;
 import entidades.ProductoPedido;
-import entidades.Rol;
-import entidades.Usuario;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -16,7 +14,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -25,7 +22,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import dao.implementaciones.*;
-import dao.interfaces.*;
 
 @Path("/productosPedidos")
 @Tags(value= {@Tag(name="Productos Pedidos",description="Metodos de productos pedidos")})

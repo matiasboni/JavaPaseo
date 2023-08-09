@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.hibernate.exception.ConstraintViolationException;
 
+import auxiliares.MD5;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.Validator;
@@ -73,6 +74,7 @@ public class UsuariosResources {
 	public Response crear(@Parameter(description="Los atributos email,password y rol son requeridos")Usuario usuario) {
 			if((usuario.getEmail()!=null)&&(usuario.getPassword()!=null)&&(usuario.getRol()!=null)) {
 				try {
+					usuario.setPassword(MD5.encodeMD5(usuario.getPassword()));
 					usuarioDAO.guardar(usuario);
 					if(usuario.getRol().equals(Rol.visitante)) {
 						Pedido p=new Pedido(Estado.Preparacion,usuario);
@@ -130,19 +132,18 @@ public class UsuariosResources {
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Operation(summary = "Modificar usuario admin", description = "Modificar un usuario existente")
+	@Operation(summary = "Modificar usuario", description = "Modificar un usuario existente")
 	@RequestBody(content = @Content(mediaType = "application/json",schema = @Schema(implementation = Usuario.class),
     examples = @ExampleObject(value = "{\"id\":1, \"email\":\"adminmodificado@gmail.com\", \"password\":\"nuevapassword\", \"rol\":\"admin\"}")))
     @ApiResponse(responseCode = "200", description = "Usuario modificado", content = @Content(mediaType = "application/json"))
     @ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content(mediaType = "text/plain"))
 	public Response editar(@Parameter(in=ParameterIn.DEFAULT,description="Los atributos id,email y password son requeridos")Usuario usuario){
 		Usuario aux = (Usuario)usuarioDAO.getById(usuario.getId());
-		if (aux != null && aux.getRol().equals(Rol.admin) && usuario.getEmail()!=null && usuario.getPassword()!=null && usuario.getRol()!=null){
+		if (aux != null && usuario.getEmail()!=null && usuario.getRol()!=null){
 			try {
 				usuarioDAO.modificar(usuario);
 				return Response.ok().entity(usuario).build();
-			//}catch(ConstraintViolationException e) { No tomaba la excepción ya que lanza una excpeción SQLIntegrityConstraintViolationException y no podia ser capturada
-				
+			//}catch(ConstraintViolationException e) { No tomaba la excepción ya que lanza una excpeción SQLIntegrityConstraintViolationException y no podia ser capturada		
 			}catch(Exception e) {
 				mensaje="El email se encuentra repetido";
 				return Response.status(Status.BAD_REQUEST).entity(mensaje).build();

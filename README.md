@@ -1,6 +1,6 @@
 # **Java y Aplicaciones Avanzadas sobre Internet 2023 Grupo7**
 
-## **Pasos para ejecutar el ambiente de prueba**
+## **Pasos para ejecutar el ambiente de prueba Java**
 
 Una vez descargado el proyecto se debe crear:
 - Una base de datos con nombre jyaa2023_bd7
@@ -22,3 +22,17 @@ Para poder probar la API se debe ingresar a http://localhost:8080/paseounlp/swag
 - PUT confirmando el pedido .(Confirmar pedido)
 - PUT modificando el pedido confirmado anteriormente. (Modificar pedido)
 - PUT enviando un id para cancelar el pedido anterior.(Cancelar pedido)
+
+## **Pasos para ejecutar el ambiente de prueba Angular**
+
+- Dentro de la carpeta angular se debe ejecutar npm install para instalar las dependencias necesarias.
+- Luego ng serve para ejecutar la aplicación angular.
+- Para acceder a la aplicación se debe entrar a  http://localhost:4200/ .
+
+### **Usuarios cargados**
+
+- admin@gmail.com
+- visitante1@gmail.com
+- visitante2@gmail.com tiene una dirección cargada.
+
+Las contraseñas de todos los usuarios cargados es 12345678

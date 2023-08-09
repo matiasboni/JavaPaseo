@@ -1,11 +1,15 @@
 package entidades;
 
+import java.math.BigDecimal;
+
 import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 
 @Entity
+@JsonIgnoreProperties({"productosPedidos"})
 public class ProductoPedido {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

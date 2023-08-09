@@ -1,6 +1,7 @@
 package misservlets;
 
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
@@ -17,7 +18,6 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import wrappers.RequestWrapper;
 
 
 /**
@@ -43,7 +43,7 @@ public class FiltroUsuarioAPI implements Filter {
 				try {
 					String[] partes=req.getPathInfo().split("/");
 					long id=Long.parseLong(partes[partes.length - 1]);
-					if(req.getMethod().equals("GET")&&(id==usuario.getId())) {
+					if(req.getMethod().equals("GET")  &&(id==usuario.getId())) {
 						chain.doFilter(request, response);
 					}
 					else {
@@ -51,7 +51,11 @@ public class FiltroUsuarioAPI implements Filter {
 					}
 				}
 				catch(NumberFormatException e) {
-					res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+					if(req.getMethod().equals("PUT")) {
+						chain.doFilter(request, response);
+					}else {
+						res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+					}
 				}
 			}else {
 				if(req.getMethod().equals("DELETE")) {

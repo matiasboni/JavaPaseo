@@ -5,7 +5,10 @@ import java.util.List;
 
 import javax.persistence.*;
 
-@Entity
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties({"pedidos"})
+@Entity 
 public class PuntoDeRetiro {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -17,7 +20,7 @@ public class PuntoDeRetiro {
 	@Column(nullable= false)
 	private String franjaHoraria;
 	@OneToMany(mappedBy="puntoDeRetiro")
-	private List<Pedido> Pedido;
+	private List<Pedido> pedidos;
 	
 	public PuntoDeRetiro() {
 		

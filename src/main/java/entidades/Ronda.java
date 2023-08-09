@@ -1,5 +1,6 @@
 package entidades;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
@@ -18,14 +19,20 @@ public class Ronda {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private long id;
 	@Column(nullable= false)
-	@JsonFormat(pattern="dd/MM/YYYY HH:mm:ss")
+	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm")
 	private Date fechaInicio;
 	@Column(nullable= false)
-	@JsonFormat(pattern="dd/MM/YYYY HH:mm:ss")
+	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm")
 	private Date fechaFin;
 	@Column(nullable= false)
-	@JsonFormat(pattern="dd/MM/YYYY")
-	private Date fechaRetiro;
+	@JsonFormat(pattern="yyyy-MM-dd")
+	private LocalDate fechaRetiro;
+	@Column(nullable= false)
+	@JsonFormat(pattern="HH:mm")
+	private LocalTime retiroInicio;
+	@Column(nullable= false)
+	@JsonFormat(pattern="HH:mm")
+	private LocalTime retiroFin;
 	@OneToMany(mappedBy="ronda")
 	private List<Pedido>pedidos;
 	
@@ -33,11 +40,12 @@ public class Ronda {
 		
 	}
 	
-	public Ronda(Date unaFechaInicio, Date unaFechaFin, Date unaFechaRetiro) {
+	public Ronda(Date unaFechaInicio, Date unaFechaFin,LocalDate unaFechaRetiro,LocalTime unInicio,LocalTime unFin) {
 		this.fechaInicio=unaFechaInicio;
 		this.fechaFin=unaFechaFin;
 		this.fechaRetiro=unaFechaRetiro;
-
+		this.retiroInicio=unInicio;
+		this.retiroFin=unFin;
 	}
 
 	public long getId() {
@@ -64,12 +72,30 @@ public class Ronda {
 		this.fechaFin = fechaFin;
 	}
 
-	public Date getFechaRetiro() {
+	
+
+	public LocalDate getFechaRetiro() {
 		return fechaRetiro;
 	}
 
-	public void setFechaRetiro(Date fechaRetiro) {
+	public void setFechaRetiro(LocalDate fechaRetiro) {
 		this.fechaRetiro = fechaRetiro;
+	}
+
+	public LocalTime getRetiroInicio() {
+		return retiroInicio;
+	}
+
+	public void setRetiroInicio(LocalTime retiroInicio) {
+		this.retiroInicio = retiroInicio;
+	}
+
+	public LocalTime getRetiroFin() {
+		return retiroFin;
+	}
+
+	public void setRetiroFin(LocalTime retiroFin) {
+		this.retiroFin = retiroFin;
 	}
 
 	public List<Pedido> getPedidos() {

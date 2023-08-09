@@ -3,10 +3,13 @@ package misservlets;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Calendar;
 import java.util.List;
 
+import auxiliares.MD5;
 import dao.implementaciones.ProductoDAOImpl;
 import dao.implementaciones.UsuarioDAOImpl;
 import dao.implementaciones.*;
@@ -80,11 +83,11 @@ public class ServletPrueba extends HttpServlet {
     }
     
     public void pruebasUsuario() {
-    	u=new Usuario("admin@gmail.com","12345678",Rol.admin, "Juan", "Ro", "4123123");
-		u1=new Usuario("visitante1@gmail.com","12345678",Rol.visitante, "Pedro", "Po", "41231232");
-		u2=new Usuario("visitante2@gmail.com","12345678",Rol.visitante, "Pepito", "dsa", "41231234");
-		u3=new Usuario("visitante3@gmail.com","123456784",Rol.visitante, "Juanfer", "crack", "91218000");
-		u4=new Usuario("visitante4@gmail.com","12345678",Rol.visitante, "Enzo", "Pe", "91218001");
+    	u=new Usuario("admin@gmail.com",MD5.encodeMD5("12345678"),Rol.admin, "Juan", "Ro", "4123123");
+		u1=new Usuario("visitante1@gmail.com",MD5.encodeMD5("12345678"),Rol.visitante, "Pedro", "Po", "41231232");
+		u2=new Usuario("visitante2@gmail.com",MD5.encodeMD5("12345678"),Rol.visitante, "Pepito", "dsa", "41231234");
+		u3=new Usuario("visitante3@gmail.com",MD5.encodeMD5("12345678"),Rol.visitante, "Juanfer", "crack", "91218000");
+		u4=new Usuario("visitante4@gmail.com",MD5.encodeMD5("12345678"),Rol.visitante, "Enzo", "Pe", "91218001");
 		//Se crea un usuario admin
 		usuarioDAO.guardar(u);
 		//Se crean usuarios visitante
@@ -185,19 +188,40 @@ public class ServletPrueba extends HttpServlet {
     
     public void pruebasProductos() {
     	produc=new Producto("Naranja","Descripcion naranja",BigDecimal.valueOf(50),r,p);
+    	Imagen imagen=new Imagen("https://res.cloudinary.com/estebandiaz/image/upload/w_256,f_auto/cocinario-beta-foods/5f22b58d6eb30acead5eb7cc.png");
+    	imagen.setProducto(produc);
+    	produc.agregarImagen(imagen);
     	produc1=new Producto("Banana","Descripcion banana",BigDecimal.valueOf(150),r,p1);
+    	imagen=new Imagen("https://images.openfoodfacts.org/images/products/4011/front_en.19.400.jpg");
+    	imagen.setProducto(produc1);
+    	produc1.agregarImagen(imagen);
     	produc2=new Producto("Lechuga","Descripcion lechuga",BigDecimal.valueOf(150),r1,p1);
+    	imagen=new Imagen("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQ-3WI5_dRPAbgXtxtKxsRSspzeqcGrM_mLYGQwXb-DVGAcCu-9RiGBgVecBQ7Wu06yxQ&usqp=CAU");
+    	imagen.setProducto(produc2);
+    	produc2.agregarImagen(imagen);
     	//Se guardan los productos
     	productoDAO.guardar(produc);
     	productoDAO.guardar(produc1);
     	productoDAO.guardar(produc2);
     	produc=new Producto("Pera","Descripcion Pera",BigDecimal.valueOf(50),r,p1);
+    	imagen=new Imagen("https://tienda.biota.app/web/image/product.template/599/image_256");
+    	imagen.setProducto(produc);
+    	produc.agregarImagen(imagen);
     	productoDAO.guardar(produc);
     	produc=new Producto("Uva","Descripcion Uva",BigDecimal.valueOf(50),r,p1);
+    	imagen=new Imagen("https://images.rappi.com.ar/products/1612640-1604433606562.png?d=136x136&e=webp");
+    	imagen.setProducto(produc);
+    	produc.agregarImagen(imagen);
     	productoDAO.guardar(produc);
     	produc=new Producto("Uva","Descripcion Uva",BigDecimal.valueOf(50),r,p);
+    	imagen=new Imagen("https://images.rappi.com.ar/products/1612648-1604433606593.png?d=136x136&e=webp");
+    	imagen.setProducto(produc);
+    	produc.agregarImagen(imagen);
     	productoDAO.guardar(produc);
     	produc=new Producto("Manzana","Descripcion manzana",BigDecimal.valueOf(50),r,p);
+    	imagen=new Imagen("https://consol.coop.ar/web/image/product.template/11651/image_256/%5B634%5D%20Manzana%20roja%20x%20kg?unique=9f687c8");
+    	imagen.setProducto(produc);
+    	produc.agregarImagen(imagen);
     	productoDAO.guardar(produc);
     	//Se recupera la lista de todos los productos
     	System.out.println("Lista de productos despues de crear");
@@ -240,7 +264,7 @@ public class ServletPrueba extends HttpServlet {
     		pp1.setPedido(pedido);
     		pedido.agregarProductoPedido(pp1);	
     	}
-    	pedido.confirmar(ronda, direccion); //Esta en pendiente
+    	pedido.confirmar(ronda, direccion,"De 10 a 12"); //Esta en pendiente
     	pedidoDAO.modificar(pedido);
     	System.out.println("Pedido despues de confirmar");
     	System.out.println(pedido);
@@ -330,10 +354,13 @@ public class ServletPrueba extends HttpServlet {
     	Calendar calendar = Calendar.getInstance();
     	calendar.set(Calendar.YEAR, 2023);
     	calendar.set(Calendar.MONTH, Calendar.JULY);
-    	calendar.set(Calendar.DAY_OF_MONTH, 3);
+    	calendar.set(Calendar.DAY_OF_MONTH, 10);
     	java.util.Date fechaInicio=calendar.getTime();
-    	calendar.set(Calendar.DAY_OF_MONTH, 8);
-    	ronda=new Ronda(fechaInicio, calendar.getTime(), calendar.getTime());
+    	calendar.set(Calendar.DAY_OF_MONTH, 14);
+    	LocalDate fechaRetiro = LocalDate.of(2023, 7, 15);
+    	LocalTime retiroInicio = LocalTime.of(8, 0);
+    	LocalTime retiroFin = LocalTime.of(17, 0);
+    	ronda = new Ronda(fechaInicio, calendar.getTime(), fechaRetiro, retiroInicio, retiroFin);
     	punto=new PuntoDeRetiro("Facultad", "Calle 50", "8 a 12");
     	puntoDeRetiroDAO.guardar(punto);
     	punto=new PuntoDeRetiro("Facultad", "Calle 50", "17 a 20");

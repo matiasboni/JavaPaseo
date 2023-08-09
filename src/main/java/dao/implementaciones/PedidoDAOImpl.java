@@ -18,6 +18,7 @@ import entidades.ModalidadEntrega;
 import entidades.Pedido;
 import entidades.Producto;
 import entidades.Productor;
+import entidades.Ronda;
 import entidades.Usuario;
 import jakarta.inject.Inject;
 
@@ -25,15 +26,8 @@ import jakarta.inject.Inject;
 @RequestScoped
 public class PedidoDAOImpl extends GenericoDAOImpl<Pedido> implements PedidoDAO{
 	
-	public List<Pedido> pedidosPorModalidad(ModalidadEntrega unaModalidad) {
-		Query q = em.createQuery("SELECT p FROM Pedido p where(p.modalidadEntrega= :modalidad and p.estado <> :estado)");
-		q.setParameter("modalidad", unaModalidad);
-		q.setParameter("estado", Estado.Cancelado);
-		List<Pedido> l = q.getResultList();
-		return l;
-	}
 	
-	// pedidos es prudctos, productor es usuario
+	// pedidos es proudctos, productor es usuario
 		public List<Pedido> pedidosDelUsuario(Usuario usuario) {
 			Query q = em.createQuery("SELECT p FROM Pedido p where(p.usuario= :usuario)");
 			q.setParameter("usuario", usuario);
@@ -51,6 +45,27 @@ public class PedidoDAOImpl extends GenericoDAOImpl<Pedido> implements PedidoDAO{
 			}catch(NoResultException e){
 				return null;
 			}
+		}
+		
+		public List<Pedido> pedidosPorModalidad(ModalidadEntrega unaModalidad) {
+			Query q = em.createQuery("SELECT p FROM Pedido p where(p.modalidadEntrega = :modalidad) order by p.fechaPedido");
+			q.setParameter("modalidad",unaModalidad);
+			List<Pedido> l=q.getResultList();
+			return l;
+		}
+		
+		public List<Pedido> pedidosDeUnaRonda(Ronda unaRonda){
+			Query q = em.createQuery("SELECT p FROM Pedido p where(p.ronda= :ronda) order by p.estado ASC");
+			q.setParameter("ronda",unaRonda);
+			List<Pedido> l=q.getResultList();
+			return l;
+		}
+		
+		public List<Pedido> pedidosPorEstado(Estado unEstado) {
+			Query q = em.createQuery("SELECT p FROM Pedido p where(p.estado = :estado) order by p.fechaPedido");
+			q.setParameter("estado",unEstado);
+			List<Pedido> l=q.getResultList();
+			return l;
 		}
 	
 

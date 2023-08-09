@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties({"productos"})
 @Entity
 public class Rubro {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private long id;
-	@Column(nullable= false)
+	@Column(unique=true,nullable=false)
 	private String nombre;
 	@OneToMany(mappedBy="rubro")
 	private List<Producto> productos=new ArrayList<Producto>();

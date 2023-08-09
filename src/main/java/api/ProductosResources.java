@@ -4,6 +4,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 import jakarta.ws.rs.core.Response.Status;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import dao.implementaciones.*;
@@ -24,6 +25,7 @@ public class ProductosResources {
 	
 //@Inject
 	private ProductoDAO productoDAO = new ProductoDAOImpl();
+	private ImagenDAO imagenDAO =new ImagenDAOImpl();
 	
 	@GET
 	@Path("{id}")
@@ -61,6 +63,62 @@ public class ProductosResources {
 	    } catch (RuntimeException e) {
 	        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error interno del servidor").build();
 	    }
+	}
+	
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Operation(summary = "Crear Producto", description = "Crea un nuevo producto")
+	public Response crear(Producto producto) {
+		if(producto.getNombre()!=null && producto.getDescripcion()!=null && producto.getPrecio()!=null && producto.getPrecio().compareTo(BigDecimal.ZERO) > 0 && producto.getProductor()!=null && producto.getRubro()!=null) {
+			try {
+				productoDAO.guardar(producto);
+				return Response.created(null).entity(producto).build();
+			}catch(Exception e) {
+				mensaje="El nombre del producto se encuentra registrado para ese productor";
+				return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+			}	
+		}
+		else {
+			mensaje="Debe completar todos los campos";
+			return Response.status(Status.BAD_REQUEST).entity(mensaje).build();
+		}
+	}
+	
+	@PUT
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Operation(summary = "Modificar producto", description = "Modificar un producto existente")
+	public Response editar(Producto producto){
+		Producto aux = (Producto)productoDAO.getById(producto.getId());
+		if (aux!=null && producto.getNombre()!=null && producto.getDescripcion()!=null && producto.getPrecio()!=null && producto.getPrecio().compareTo(BigDecimal.ZERO) > 0 && producto.getProductor()!=null && producto.getRubro()!=null){
+			try {
+				productoDAO.modificar(producto);
+				return Response.ok().entity(producto).build();
+			}catch(Exception e) {
+				mensaje="El nombre del producto se encuentra registrado para ese productor";
+				return Response.status(Status.BAD_REQUEST).entity(mensaje).build();
+			}	
+		} else {
+			mensaje="Los datos no son válidos";
+			return Response.status(Status.NOT_FOUND).entity(mensaje).build();
+		}
+	}
+	
+	@DELETE
+	@Path("{id}")
+	@Produces(MediaType.TEXT_PLAIN)
+	@Operation(summary = "Eliminar producto", description = "Elimina un producto por su ID")
+	public Response borrar(@PathParam("id") Integer id) {
+		Producto producto =(Producto) productoDAO.getById(id);
+		if(producto!= null ) {
+			productoDAO.eliminar(producto);
+			return Response.noContent().build();
+		}
+		else {
+			mensaje= "Producto no encontrado";
+			return Response.status(Status.NOT_FOUND).entity(mensaje).build();
+		}
 	}
 	
 	

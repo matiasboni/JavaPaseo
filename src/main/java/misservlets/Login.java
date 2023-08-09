@@ -1,6 +1,8 @@
 package misservlets;
 
 import java.io.IOException;
+
+import auxiliares.MD5;
 import jakarta.inject.Inject;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
@@ -22,6 +24,7 @@ public class Login extends HttpServlet {
 	        String email = request.getParameter("email");
 	        String password = request.getParameter("password");
 	        usuario = usuarioDAO.getByEmail(email);
+	        password=MD5.decodeMD5(password);
 	        if (usuario != null && usuario.getPassword().equals(password) ) {
 	        	HttpSession sesion=request.getSession();
 	        	if(sesion.isNew()) {

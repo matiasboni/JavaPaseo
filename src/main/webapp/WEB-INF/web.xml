@@ -121,4 +121,23 @@
     	<filter-name>filtrousuario</filter-name>
     	<url-pattern>/api/usuarios/*</url-pattern>
 	</filter-mapping>
+	<filter>
+    	<filter-name>filtroadmin</filter-name>
+    	<filter-class>misservlets.FiltroSoloAdmin</filter-class>
+	</filter>
+	<filter-mapping>
+    	<filter-name>filtroadmin</filter-name>
+    	<url-pattern>/api/rondas/*</url-pattern>
+	</filter-mapping>
+	<filter>
+    	<filter-name>filtrorol</filter-name>
+    	<filter-class>misservlets.FiltroRolAPI</filter-class>
+	</filter>
+	<filter-mapping>
+    	<filter-name>filtrorol</filter-name>
+    	<url-pattern>/api/productores/*</url-pattern>
+    	<url-pattern>/api/productos/*</url-pattern>
+    	<url-pattern>/api/puntos/*</url-pattern>
+    	<url-pattern>/api/rubros/*</url-pattern>
+	</filter-mapping>
 </web-app>

@@ -102,6 +102,12 @@ public class Usuario {
 	public void setRol(Rol rol) {
 		this.rol = rol;
 	}
+	
+	
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
 
 	public String toString() {
 		return this.id+","+this.email + ","+ this.password+","+this.rol;

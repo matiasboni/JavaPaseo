@@ -1,6 +1,7 @@
 package entidades;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -21,9 +22,10 @@ public class Pedido {
 	@Enumerated(EnumType.STRING)
 	private ModalidadEntrega modalidadEntrega;
 	private Date fechaPedido;
-	private Date fechaEntrega;
+	private LocalDate fechaEntrega;
 	@OneToOne
 	private Direccion direccionEntrega;
+	private String rangoHorarioD;
 	@ManyToOne
 	@JoinColumn(name="ronda_id")
 	private Ronda ronda;
@@ -46,6 +48,7 @@ public class Pedido {
 		this.usuario=unUsuario;
 	}
 	
+	
 	public void agregarProductoPedido(ProductoPedido p) {
 		     productosPedidos.add(p);
 		     this.total=this.total.add(p.getProducto().getPrecio().multiply(BigDecimal.valueOf(p.getCantidad())));    
@@ -63,10 +66,16 @@ public class Pedido {
 	     this.total=this.total.subtract(p.getProducto().getPrecio().multiply(BigDecimal.valueOf(p.getCantidad())));
 	}
 	
-	public void confirmar(Ronda unaRonda, Direccion unaDireccion) { //Entrega
+	public void eliminarProductosPedidos() {
+		this.getProductosPedidos().clear();
+	    this.total=BigDecimal.ZERO;
+	}
+	
+	public void confirmar(Ronda unaRonda, Direccion unaDireccion,String unRango) { //Entrega
 		if (this.estado.equals(Estado.Preparacion)) {
 			this.modalidadEntrega = ModalidadEntrega.Reparto;
 			this.direccionEntrega = unaDireccion;
+			this.rangoHorarioD=unRango;
 			this.setearConfirmar(unaRonda);
 		}
 		
@@ -93,6 +102,20 @@ public class Pedido {
 			ok=true;
 		}
 		return ok;
+	}
+	
+	public void entregado() {
+		this.estado=Estado.Entregado;
+		this.fechaEntrega=this.ronda.getFechaRetiro();
+	}
+	
+	
+	public void repetir(Pedido p,Ronda unaRonda) {
+		this.usuario=p.getUsuario();
+		this.modalidadEntrega=p.getModalidadEntrega();
+		this.direccionEntrega=p.getDireccionEntrega();
+		this.puntoDeRetiro=p.getPuntoDeRetiro();
+		this.setearConfirmar(unaRonda);
 	}
 	
 	public ModalidadEntrega getModalidadEntrega() {
@@ -135,12 +158,14 @@ public class Pedido {
 	public void setFechaPedido(Date fechaPedido) {
 		this.fechaPedido = fechaPedido;
 	}
+	
+	
 
-	public Date getFechaEntrega() {
+	public LocalDate getFechaEntrega() {
 		return fechaEntrega;
 	}
 
-	public void setFechaEntrega(Date fechaEntrega) {
+	public void setFechaEntrega(LocalDate fechaEntrega) {
 		this.fechaEntrega = fechaEntrega;
 	}
 
@@ -182,6 +207,16 @@ public class Pedido {
 
 	public void setProductosPedidos(List<ProductoPedido> productosPedidos) {
 		this.productosPedidos = productosPedidos;
+	}
+	
+	
+
+	public String getRangoHorarioD() {
+		return rangoHorarioD;
+	}
+
+	public void setRangoHorarioD(String rangoHorarioD) {
+		this.rangoHorarioD = rangoHorarioD;
 	}
 
 	public String toString() {

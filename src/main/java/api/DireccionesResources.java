@@ -7,6 +7,7 @@ import jakarta.ws.rs.core.*;
 import jakarta.ws.rs.core.Response.Status;
 import entidades.Direccion;
 import entidades.Pedido;
+import entidades.Rubro;
 import entidades.Usuario;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -16,6 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
 import dao.implementaciones.*;
 import dao.interfaces.*;
+import dto.DireccionDTO;
 
 import java.util.List;
 
@@ -64,5 +66,30 @@ public class DireccionesResources {
 			mensaje="No se encontraron las direcciones";
 			return Response.status(Status.NOT_FOUND).entity(mensaje).build();
 		}
+	}
+	
+	
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Operation(summary = "Crear Direccion", description = "Crea una nueva direccion")
+	public Response crear(DireccionDTO direccionDTO) {
+		try {
+	        Direccion direccion = new Direccion();
+	        direccion.setCalle(direccionDTO.getCalle());
+	        direccion.setNro(direccionDTO.getNro());
+	        direccion.setPiso(direccionDTO.getPiso());
+	        direccion.setDepartamento(direccionDTO.getDepartamento());
+	        
+	       
+	        Usuario usuario = usuarioDAO.getById(direccionDTO.getUsuario_id());
+	        direccion.setUsuario(usuario);
+	        
+	        direccionDAO.guardar(direccion);
+
+	        return Response.status(Response.Status.CREATED).entity(direccion).build();
+		} catch (Exception e) {
+	        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al crear la dirección").build();
+	    }
 	}
 }

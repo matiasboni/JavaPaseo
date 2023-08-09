@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import auxiliares.MD5;
 import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
@@ -42,7 +43,9 @@ public class PedidosResources {
 	private PedidoDAOImpl pedidoDAO = new PedidoDAOImpl();
 	//@Inject
 	private ProductoDAOImpl productoDAO = new ProductoDAOImpl();
+	private ProductoPedidoDAOImpl ppDAO=new ProductoPedidoDAOImpl();
 	private UsuarioDAOImpl usuarioDAO=new UsuarioDAOImpl();
+	private RondaDAOImpl rondaDAO=new RondaDAOImpl();
 	
 	@PUT
 	@Path("/confirmar")
@@ -128,6 +131,48 @@ public class PedidosResources {
 	}
 	
 	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Operation(summary = "Obtener lista de pedidos", description = "Devuelve la lista de pedidos")
+	@ApiResponses(value = {
+		    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "application/json")),
+		    @ApiResponse(responseCode = "400", description = "Error de consulta", content = @Content(mediaType = "text/plain")),
+		    @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content(mediaType = "text/plain"))
+		})
+	public Response getPedidos(){
+		try {
+	        List<Pedido> pedidos = pedidoDAO.lista();
+	        return Response.ok().entity(pedidos).build();
+	    } catch (IllegalArgumentException e) {
+	    	mensaje="Error :";
+	        return Response.status(Response.Status.BAD_REQUEST).entity(mensaje + e.getMessage()).build();
+	    } catch (RuntimeException e) {
+	        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error interno del servidor").build();
+	    }
+	}
+	
+	@GET
+	@Path("/entregados")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Operation(summary = "Obtener lista de pedidos entregados", description = "Devuelve la lista de pedidos entregados")
+	@ApiResponses(value = {
+		    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "application/json")),
+		    @ApiResponse(responseCode = "400", description = "Error de consulta", content = @Content(mediaType = "text/plain")),
+		    @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content(mediaType = "text/plain"))
+		})
+	public Response getPedidosEntregados(){
+		try {
+	        List<Pedido> pedidos = pedidoDAO.pedidosPorEstado(Estado.Entregado);
+	        return Response.ok().entity(pedidos).build();
+	    } catch (IllegalArgumentException e) {
+	    	mensaje="Error :";
+	        return Response.status(Response.Status.BAD_REQUEST).entity(mensaje + e.getMessage()).build();
+	    } catch (RuntimeException e) {
+	        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error interno del servidor").build();
+	    }
+	}
+	
+	
+	@GET
 	@Path("/usuario/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(summary = "Obtener pedidos de usuario", description = "Obtiene los pedidos de un usuario por su id")
@@ -146,9 +191,32 @@ public class PedidosResources {
 	}
 	
 	@GET
+	@Path("/ronda/{id}")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Operation(summary = "Obtener los pedidos pendientes y completados de una ronda", description = "Obtiene los pedidos de una ronda")
+    @ApiResponse(responseCode = "200", description = "Pedidos encontrados", content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "404", description = "Pedidos no encontrados", content = @Content(mediaType = "text/plain"))
+	public Response pedidosPendientes(@PathParam("id") Integer id) {
+		Ronda ronda=rondaDAO.getById(id);
+		if(ronda!=null) {
+			try {
+				List<Pedido> listaPedidos=pedidoDAO.pedidosDeUnaRonda(ronda);
+				return Response.ok().entity(listaPedidos).build();
+			}catch (IllegalArgumentException e) {
+				mensaje="Error :";
+				return Response.status(Response.Status.BAD_REQUEST).entity(mensaje + e.getMessage()).build();
+			} catch (RuntimeException e) {
+				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error interno del servidor").build();
+			}
+		}else {
+			return Response.status(Response.Status.BAD_REQUEST).entity("La ronda no existe").build();
+		}
+	}
+	
+	@GET
 	@Path("/pendiente/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
-	@Operation(summary = "Obtener pedido pendiente de usuario", description = "Obtiene el carrito del usuario")
+	@Operation(summary = "Obtener carrito de usuario", description = "Obtiene el carrito del usuario")
     @ApiResponse(responseCode = "200", description = "Carrito encontrado", content = @Content(mediaType = "application/json"))
     @ApiResponse(responseCode = "404", description = "Carrito no encontrado", content = @Content(mediaType = "text/plain"))
 	public Response pedidosPendiente(@PathParam("id") Integer id) {
@@ -252,4 +320,92 @@ public class PedidosResources {
 			}
 		return r;
 	}
+	
+	@PUT
+	@Path("/repetir/{id}")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Operation(summary = "Repetir pedido", description = "Repite un pedido")
+	public Response repetir(@PathParam("id") Integer id) {
+		System.out.println("Llegue hasta aca");
+		Pedido pedido=(Pedido)pedidoDAO.getById(id);
+		Response r;
+		if(pedido!=null) {
+			if(PedidoHelper.verificarStock(pedido)) {
+				Pedido nuevo=new Pedido();
+				PedidoHelper.repetirPedido(nuevo,pedido);
+				List<ProductoPedido> lpp = pedido.getProductosPedidos();
+				List<ProductoPedido> lppN=new ArrayList<ProductoPedido>();
+			    for (ProductoPedido productopedido : lpp ) {
+			    	ProductoPedido pp=new ProductoPedido(productopedido.getProducto(),nuevo,productopedido.getCantidad());
+			    	lppN.add(pp);
+			    }
+			    nuevo.setProductosPedidos(lppN);
+			    nuevo.calcularTotal();
+				pedidoDAO.guardar(nuevo);
+				lpp = nuevo.getProductosPedidos();
+			    for (ProductoPedido productopedido : lpp ) {
+			    	productopedido.getProducto().descontarStock(productopedido.getCantidad());
+			    	productoDAO.modificar(productopedido.getProducto());
+			    }
+			    r=Response.status(Status.CREATED).entity(nuevo).build();
+			}else {
+				mensaje="No hay suficiente stock para repetir el pedido";
+				r=Response.status(Status.BAD_REQUEST).entity(mensaje).build();
+			}
+		}else {
+				mensaje="No existe el pedido";
+				r=Response.status(Status.BAD_REQUEST).entity(mensaje).build();
+		}
+		return r;
+	}
+	
+	@PUT
+	@Path("/vaciar/{id}")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Operation(summary = "Vaciar carrito", description = "Vacia el carrito")
+	public Response vaciarCarrito(@PathParam("id") Integer id){
+		Pedido pedido=(Pedido)pedidoDAO.getById(id);
+		Response r;
+		if(pedido!=null && pedido.getEstado().equals(Estado.Preparacion)){
+				if(pedido.getProductosPedidos().size() > 0) {
+					List<ProductoPedido> lpp=pedido.getProductosPedidos();
+					for(ProductoPedido pp:lpp) {
+						System.out.println(pp.getId());
+						ppDAO.eliminar(pp);
+					}
+					pedido.eliminarProductosPedidos();
+					pedidoDAO.modificar(pedido);
+					r= Response.ok().entity(pedido).build();
+				}else {
+					mensaje="El carrito no tiene productos";
+					r=Response.status(Status.BAD_REQUEST).entity("mensaje").build();
+				}
+		}else {
+			mensaje="El carrito no fue encontrado";
+			r=Response.status(Status.BAD_REQUEST).entity("mensaje").build();
+		}
+		return r;
+	}
+	
+	@PUT
+	@Path("/entregar/{id}")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Operation(summary = "Marcar pedido como entregado", description = "Marca el pedido como entregado")
+	public Response entregarPedido(@PathParam("id") Integer id){
+		Pedido pedido=(Pedido)pedidoDAO.getById(id);
+		Response r;
+		if(pedido!=null && pedido.getEstado().equals(Estado.Pendiente)){
+				pedido.entregado();
+				pedidoDAO.modificar(pedido);
+				r=Response.status(Status.OK).entity(pedido).build();
+				
+		}else {
+			mensaje="El pedido no fue encontrado";
+			r=Response.status(Status.BAD_REQUEST).entity("mensaje").build();
+		}
+		return r;
+	}
+	
 }

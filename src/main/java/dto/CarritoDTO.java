@@ -9,6 +9,7 @@ public class CarritoDTO {
 	private List<ProductoPedidoDTO> productosPedidos = new ArrayList<ProductoPedidoDTO>();
 	private long direccionEntrega_id;
 	private long puntoDeRetiro_id;
+	private String rangoHorarioD;
 	public long getId() {
 		return id;
 	}
@@ -33,6 +34,13 @@ public class CarritoDTO {
 	public void setPuntoDeRetiro_id(long puntoDeRetiro_id) {
 		this.puntoDeRetiro_id = puntoDeRetiro_id;
 	}
+	public String getRangoHorarioD() {
+		return rangoHorarioD;
+	}
+	public void setRangoHorarioD(String rangoHorarioD) {
+		this.rangoHorarioD = rangoHorarioD;
+	}
+	
 	
 	
 	

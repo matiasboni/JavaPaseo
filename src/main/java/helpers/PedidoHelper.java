@@ -13,10 +13,15 @@ public class PedidoHelper {
 	public static void confirmarPedido(Pedido p) {
 			RondaDAOImpl rondaDAO=new RondaDAOImpl();
 	    	if(p.getDireccionEntrega()!=null) {
-	    		p.confirmar(rondaDAO.rondaActual(),p.getDireccionEntrega());
+	    		p.confirmar(rondaDAO.rondaActual(),p.getDireccionEntrega(),p.getRangoHorarioD());
 	    	}else{
 	    		p.confirmar(rondaDAO.rondaActual(),p.getPuntoDeRetiro());
 	    	}
+	}
+	
+	public static void repetirPedido(Pedido nuevo,Pedido viejo) {
+		RondaDAOImpl rondaDAO=new RondaDAOImpl();
+    	nuevo.repetir(viejo,rondaDAO.rondaActual());
 	}
 	
 	public static boolean setearProductosPedidos(CarritoDTO carrito,Pedido p) {
@@ -48,16 +53,23 @@ public class PedidoHelper {
 	}
 	
 	public static boolean setearPedido(Pedido p,CarritoDTO carrito) {
+		boolean ok=false;
 		DireccionDAOImpl direccionDAO=new DireccionDAOImpl();
 		PuntoDeRetiroDAOImpl puntoDeRetiroDAO=new PuntoDeRetiroDAOImpl();
-		if(carrito.getDireccionEntrega_id()!=0) {
+		if(carrito.getDireccionEntrega_id()!=0 && carrito.getRangoHorarioD()!=null) {
+			ok=true;
 			p.setDireccionEntrega((Direccion)direccionDAO.getById(carrito.getDireccionEntrega_id()));
+			p.setRangoHorarioD(carrito.getRangoHorarioD());
 			p.setModalidadEntrega(ModalidadEntrega.Reparto);
+			p.setPuntoDeRetiro(null);
 		}else {
+			ok=true;
 			p.setPuntoDeRetiro((PuntoDeRetiro)puntoDeRetiroDAO.getById(carrito.getPuntoDeRetiro_id()));
 			p.setModalidadEntrega(ModalidadEntrega.Retiro);
+			p.setDireccionEntrega(null);
+			p.setRangoHorarioD(null);
 		}
-		return true;
+		return ok;
 	}
 	
 	public static boolean validacionDeStock(List<ProductoPedido> productosViejos,Pedido pedido,List<Producto> productosActualizar) {

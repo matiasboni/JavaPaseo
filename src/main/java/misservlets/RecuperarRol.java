@@ -21,7 +21,6 @@ public class RecuperarRol extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		HttpSession sesion=request.getSession(false);
 		if(sesion!=null) {
-			System.out.println("Entramos bien");
 			Usuario usuario=(Usuario)sesion.getAttribute("usuario");
 			String rol=usuario.getRol().toString();
 			response.setContentType("application/json");

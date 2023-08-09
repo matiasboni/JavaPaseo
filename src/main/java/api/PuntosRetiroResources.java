@@ -62,4 +62,52 @@ public class PuntosRetiroResources {
 	        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 	    }
 	}
+	
+	
+	
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Operation(summary = "Crear Punto de Retiro", description = "Crea un nuevo punto de retiro")
+	public Response crear(PuntoDeRetiro punto) {
+		if(punto.getNombre()!=null && punto.getDireccion()!= null && punto.getFranjaHoraria() != null) {
+				puntoDeRetiroDAO.guardar(punto);
+				return Response.created(null).entity(punto).build();
+		}
+		else {
+			mensaje="Debe completar todos los campos";
+			return Response.status(Status.BAD_REQUEST).entity(mensaje).build();
+		}
+	}
+	
+	@PUT
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Operation(summary = "Modificar punto de retiro", description = "Modificar un punto de retiro existente")
+	public Response editar(PuntoDeRetiro punto){
+		PuntoDeRetiro aux = (PuntoDeRetiro)puntoDeRetiroDAO.getById(punto.getId());
+		if (aux!=null && punto.getNombre()!=null){
+			puntoDeRetiroDAO.modificar(punto);
+			return Response.ok().entity(punto).build();
+		} else {
+			mensaje="Los datos no son válidos";
+			return Response.status(Status.NOT_FOUND).entity(mensaje).build();
+		}
+	}
+	
+	@DELETE
+	@Path("{id}")
+	@Produces(MediaType.TEXT_PLAIN)
+	@Operation(summary = "Eliminar punto de retiro", description = "Elimina un punto de retiro por su ID")
+	public Response borrar(@PathParam("id") Integer id) {
+		PuntoDeRetiro punto =(PuntoDeRetiro) puntoDeRetiroDAO.getById(id);
+		if(punto != null ) {
+			puntoDeRetiroDAO.eliminar(punto);
+			return Response.noContent().build();
+		}
+		else {
+			mensaje= "Punto de retiro no encontrado";
+			return Response.status(Status.NOT_FOUND).entity(mensaje).build();
+		}
+	}
 }

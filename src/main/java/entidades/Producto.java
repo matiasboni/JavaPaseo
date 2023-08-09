@@ -5,7 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
+@JsonIgnoreProperties({"productosPedidos"})
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"nombre", "productor_id"}))
 public class Producto {
 	
 	@Id
@@ -23,9 +28,10 @@ public class Producto {
 	@ManyToOne
 	@JoinColumn(name="productor_id")
 	private Productor productor;
-	@OneToMany(mappedBy="producto",cascade = CascadeType.ALL)
-	private List<ProductoPedido> productosPedidos;
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true,mappedBy="producto")
+	@OneToMany(mappedBy="producto",cascade = CascadeType.ALL,fetch=FetchType.EAGER)
+	private List<ProductoPedido> productosPedidos= new ArrayList<ProductoPedido>();
+	@OneToMany(cascade = CascadeType.ALL,mappedBy="producto")
+	@JsonManagedReference
 	private List<Imagen> imagenes=new ArrayList<Imagen>();
 	
 	public Producto() {
@@ -123,6 +129,16 @@ public class Producto {
 
 	public void setImagenes(List<Imagen> imagenes) {
 		this.imagenes = imagenes;
+	}
+	
+	
+
+	public List<ProductoPedido> getProductosPedidos() {
+		return productosPedidos;
+	}
+
+	public void setProductosPedidos(List<ProductoPedido> productosPedidos) {
+		this.productosPedidos = productosPedidos;
 	}
 
 	public String toString() {
